@@ -16,12 +16,26 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
         
-      # LỚP BẢO VỆ 1: QUÉT NHANH (Fast Fail)
+      # LỚP BẢO VỆ 1: QUÉT SÂU BẰNG KỊCH BẢN (Custom Regex Scan)
       - name: Layer 1 - Custom Script Scan
         run: |
-          echo "🔍 Dang quet tu khoa nhay cam..."
+          echo "🔍 Dang quet tu khoa nhay cam va bien so..."
+          
+          # Bẫy 1: Bắt tên hàm nguy hiểm (Kể cả khi bị đổi tên một phần)
           if grep -r "activatePowerPegMode" src/main/java; then
-            echo "❌ CANH BAO: Phat hien ham Power Peg cu! Dung Pipeline ngay lap tuc."
+            echo "❌ CẢNH BÁO: Phat hien ham Power Peg cu! Dung Pipeline ngay lap tuc."
+            exit 1
+          fi
+          
+          # Bẫy 2: Bắt việc dùng biến cũ (ví dụ: receivedFlag)
+          if grep -r -E "\breceivedFlag\b" src/main/java; then
+            echo "❌ CẢNH BÁO: Phat hien bien cam 'receivedFlag' duoc su dung!"
+            exit 1
+          fi
+
+          # Bẫy 3: Bắt lỗi dùng System.out.println (Ép dùng Logger)
+          if grep -r "System.out.println" src/main/java; then
+            echo "❌ CẢNH BÁO: Khong dung System.out.println trong code Production!"
             exit 1
           fi
 
@@ -30,7 +44,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        # BẠN HÃY SỬA CHỮ "Tên_Project_Của_Bạn" Ở DÒNG DƯỚI THÀNH PROJECT KEY TRÊN SONARCLOUD NHÉ
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=NguyenHuy-test_knight-capital-demo
  
       # BƯỚC CUỐI: ĐÓNG GÓI
