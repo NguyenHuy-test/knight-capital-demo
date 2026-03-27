@@ -12,11 +12,11 @@ public class TradingSystem {
     public static void executeOrder(int flag) {
         if (flag == 1) {
             // ĐÂY LÀ MÃ NGUỒN CHẾT (DEAD CODE) LẼ RA PHẢI XÓA TỪ 8 NĂM TRƯỚC
-            kiemthu();
+            oldTradingLogic();
         }
     }
 
-    private static void kiemthu() {
+    private static void oldTradingLogic() {
         int orders = 0;
         while (true) {
             orders++;
